@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Job Board</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 2rem;
+      background-color: #f8f9fa;
+    }
+    h1 {
+      text-align: center;
+    }
+    .filters {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    select, input {
+      padding: 0.5rem;
+      font-size: 1rem;
+    }
+    .job-card {
+      background: white;
+      padding: 1rem;
+      margin: 0.5rem auto;
+      width: 80%;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+    .job-card:hover {
+      background-color: #e9ecef;
+    }
+    .job-title {
+      font-weight: bold;
+      margin-bottom: 0.25rem;
+    }
+    .job-link {
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <h1>Job Board</h1>
+  <div class="filters">
+    <select id="companySelect">
+      <option value="All">All Companies</option>
+      <option value="Amazon">Amazon</option>
+      <option value="Google">Google</option>
+      <option value="Meta">Meta</option>
+    </select>
+    <input type="text" id="keywordInput" placeholder="Search by keyword" />
+    <input type="text" id="locationInput" placeholder="Search by location" />
+    <button onclick="fetchJobs()">Search</button>
+  </div>
+  <div id="jobsContainer"></div>
+
+  <script>
+    async function fetchJobs() {
+      const company = document.getElementById("companySelect").value;
+      const keyword = document.getElementById("keywordInput").value;
+      const location = document.getElementById("locationInput").value;
+
+      const query = new URLSearchParams();
+      if (company && company !== "All") query.append("company", company);
+      if (keyword) query.append("keyword", keyword);
+      if (location) query.append("location", location);
+
+      const res = await fetch(`/jobs?${query.toString()}`);
+      const jobs = await res.json();
+
+      const container = document.getElementById("jobsContainer");
+      container.innerHTML = "";
+      jobs.forEach(job => {
+        const card = document.createElement("div");
+        card.className = "job-card";
+
+        // Use an anchor tag to wrap the entire card, making it clickable and opening in new tab
+        card.innerHTML = `
+          <a href="${job.url}" target="_blank" class="job-link">
+            <div class="job-title">${job.title}</div>
+            <div>${job.company} — ${job.location}</div>
+          </a>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    window.onload = fetchJobs;
+  </script>
+</body>
+</html>
